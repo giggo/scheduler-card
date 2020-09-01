@@ -65,7 +65,6 @@ export function ValidateConfig(config: any) {
         if (domainEntry) {
           _.each(domainEntry['actions'], actionCfg => {
             if (!Required(actionCfg, 'service', TYPE_STRING)) throw `In ${entry}->actions at 'service: ${actionCfg['service']}': expected type '${TYPE_STRING}', but got '${Type(actionCfg['service'])}'.`;
-            if (!Optional(actionCfg, 'name', TYPE_STRING)) throw `In ${entry}->actions at 'name: ${actionCfg['name']}': expected type '${TYPE_STRING}', but got '${Type(actionCfg['name'])}'.`;
             if (!Optional(actionCfg, 'icon', TYPE_STRING)) throw `In ${entry}->actions at 'icon: ${actionCfg['icon']}': expected type '${TYPE_STRING}', but got '${Type(actionCfg['icon'])}'.`;
             if (!Optional(actionCfg, 'service_data', TYPE_OBJECT)) throw `In ${entry}->actions at 'service_data: ${actionCfg['service_data']}': expected type '${TYPE_OBJECT}', but got '${Type(actionCfg['service_data'])}'.`;
           });

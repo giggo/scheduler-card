@@ -1,5 +1,5 @@
 
-import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
+import { LitElement, html, customElement, property, CSSResult, TemplateResult, eventOptions } from 'lit-element';
 import { HomeAssistant } from 'custom-card-helpers';
 import _ from "lodash";
 import { Config } from './config-parser';
@@ -28,7 +28,6 @@ export class SchedulerCard extends LitElement {
   shadowRoot: any;
   await_update: boolean = true;
 
-
   @property() private _hass?: HomeAssistant;
 
   set hass(hass: HomeAssistant) {
@@ -54,13 +53,120 @@ export class SchedulerCard extends LitElement {
 
   protected awaitUpdate() {
     this.await_update = true;
+
   }
+
+  @eventOptions({ passive: true })
+  private _handleTouchStart(e: MouseEvent | TouchEvent) {
+    let thumbElement: HTMLElement | null;
+    if (e instanceof TouchEvent) {
+      thumbElement = e.changedTouches.item[0].target;
+    }
+    else {
+      thumbElement = e.target as HTMLElement;
+    }
+    if (!thumbElement) return;
+    let parentElement = thumbElement.parentNode as HTMLElement;
+    let trackElement: HTMLElement | null = parentElement.parentElement;
+    if (!trackElement) return;
+    let trackCoords = trackElement.getBoundingClientRect();
+    let leftNeighbour: HTMLElement = parentElement.previousElementSibling as HTMLElement;
+    let rightNeighbour: HTMLElement = parentElement.nextElementSibling as HTMLElement;
+
+    let toolTip = parentElement.getElementsByClassName("slider-thumb-tooltip")[0];
+
+    const stepSize = trackCoords.width / (24 * 4);
+    const trackPadding = 10;
+
+    var mouseMoveHandler = function (e: MouseEvent | TouchEvent) {
+      let startDragX;
+      if (e instanceof TouchEvent) {
+        startDragX = e.changedTouches.item[0].pageX;
+      }
+      else {
+        startDragX = e.pageX;
+      }
+      let x = startDragX - trackCoords.left;
+      if (x < trackPadding) x = trackPadding;
+      else if (x > (trackCoords.width - trackPadding)) x = trackCoords.width - trackPadding;
+
+      let pct = (x - trackPadding) / (trackCoords.width - 2 * trackPadding);
+      let steps = Math.round(pct * (24 * 4));
+      x = Math.round(x / stepSize) * stepSize;
+
+      leftNeighbour.style.width = `${Math.round(x)}px`;
+      rightNeighbour.style.width = `${Math.round(trackCoords.width - x)}px`;
+
+      let hours = Math.floor(steps / 4);
+      let minutes = (steps - hours * 4) * 15;
+      if (hours == 24) { hours = 23; minutes = 59; }
+      toolTip.innerHTML = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+
+    }
+
+    var mouseUpHandler = function () {
+      window.removeEventListener('mousemove', mouseMoveHandler);
+      window.removeEventListener('touchmove', mouseMoveHandler);
+      window.removeEventListener('mouseup', mouseUpHandler);
+      window.addEventListener('touchend', mouseUpHandler);
+    }
+
+    window.addEventListener('mouseup', mouseUpHandler);
+    window.addEventListener('touchend', mouseUpHandler);
+    window.addEventListener('mousemove', mouseMoveHandler);
+    window.addEventListener('touchmove', mouseMoveHandler);
+
+  }
+
+
+  private _addHandle() {
+
+  }
+
 
   protected render(): TemplateResult {
     if (!this.selection.newItem && !this.selection.editItem) {
       return html`
       <ha-card>
         <div class="card-header">Scheduler</div>
+        <div class="card-section">
+          <div class="slider-container">
+            <div style="padding: 0px 7px">
+              <div class="slider-track">
+                <div class="slider-segment"></div>
+                <div class="slider-thumb">
+                  <ha-icon icon="hass:unfold-more-vertical"  @mousedown="${this._handleTouchStart}" @touchstart="${this._handleTouchStart}"></ha-icon>
+                  <div class="slider-thumb-tooltip">
+                      12:00
+                  </div>
+                </div>
+                <div class="slider-segment"></div>
+                <div class="slider-thumb">
+                  <ha-icon icon="hass:unfold-more-vertical"  @mousedown="${this._handleTouchStart}" @touchstart="${this._handleTouchStart}"></ha-icon>
+                  <div class="slider-thumb-tooltip">
+                      12:00
+                  </div>
+                </div>
+                <div class="slider-segment"></div>
+              </div>
+            </div>
+            <div class="slider-legend">
+              <div class="slider-legend-item">00:00</div>
+              <div class="slider-legend-item">03:00</div>
+              <div class="slider-legend-item">06:00</div>
+              <div class="slider-legend-item">09:00</div>
+              <div class="slider-legend-item">12:00</div>
+              <div class="slider-legend-item">15:00</div>
+              <div class="slider-legend-item">18:00</div>
+              <div class="slider-legend-item">21:00</div>
+              <div class="slider-legend-item">23:59</div>
+            </div>
+            <div>
+              <mwc-button><ha-icon icon="mdi:plus" @click="${this._addHandle}></ha-icon></mwc-button>
+            </div>
+          </div>
+        </div>
         <div class="card-section first">
         ${this.getEntries()}
         </div>

@@ -212,6 +212,85 @@ export const styles = css`
       .padded-right {
         margin-right: 11px;
       }
+
+      div.slider-track {
+        height: 36px;
+        width: 100%;
+        background: var(--light-primary-color);
+        border-radius: 15px;
+        display: flex;
+      }
+      
+      div.slider-segment {
+        height: calc(100% - 6px);
+        width: 50%;
+        display: flex;
+        background: var(--primary-color);
+        opacity: 0.5;
+        z-index: 1;
+        margin: 3px;
+        cursor: pointer;
+      }
+
+      div.slider-segment:hover {
+        opacity: 0.7;
+      }
+      
+      div.slider-track div.slider-segment:first-of-type {
+        border-radius: 12px 0px 0px 12px;
+
+      }
+
+      div.slider-track div.slider-segment:last-of-type {
+        border-radius: 0px 12px 12px 0px;
+
+      }
+
+      div.slider-thumb {
+        height: 100%;
+        width: 2px;
+        background: var(--primary-text-color);
+        display: flex;
+        cursor: pointer;
+        z-index: 5;
+      }
+
+      div.slider-thumb ha-icon {
+        background: white;
+        width: 20px;
+        height: 20px;
+        --mdc-icon-size: 20px;
+        line-height: 16px;
+        border-radius: 100%;
+        margin-left: -10px;
+        margin-top: 8px;
+      }
+
+      div.slider-legend {
+        display: flex;
+        width: 100%;
+      }
+
+      div.slider-legend-item {
+        width: calc(100% / 9);
+        font-size: 8px;
+        display: flex;
+        justify-content: center;
+      }
+
+      div.slider-thumb-tooltip {
+        background: var(--primary-color);
+        color: var(--text-primary-color);
+        border-radius: 5px;
+        font-size: 10px;
+        position: absolute;
+        height: 16px;
+        width: 40px;
+        margin-top: -17px;
+        margin-left: -20px;
+        text-align: center;
+        line-height: 16px;
+      }
 `;
 
 export default styles;
